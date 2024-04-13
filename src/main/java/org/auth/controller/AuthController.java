@@ -30,6 +30,7 @@ public class AuthController {
     private final JwtTokenUtil jwtTokenUtil;
     private final UserDetailsService userDetailsService;
     private final UserDetailsJwtService userDetailsJwtService;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * @param jwtTokenUtil          The JwtTokenUtil.
@@ -37,13 +38,14 @@ public class AuthController {
      * @param userDetailsJwtService The UserDetailsJwtService user.
      */
     @Autowired
-    AuthController(JwtTokenUtil jwtTokenUtil,
+    public AuthController(JwtTokenUtil jwtTokenUtil,
                    UserDetailsService userDetailsService, UserDetailsJwtService userDetailsJwtService,
-                   AuthenticationManager authenticationManager) {
+                   AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder) {
         this.jwtTokenUtil = jwtTokenUtil;
         this.userDetailsService = userDetailsService;
         this.userDetailsJwtService = userDetailsJwtService;
         this.authenticationManager = authenticationManager;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -68,6 +70,8 @@ public class AuthController {
      */
     @PostMapping(value = "/login")
     public ResponseEntity<JwtResponse> login(@RequestBody User request) throws Exception {
+        String hashedPassword = passwordEncoder.encode(request.getPassword());
+        request.setPassword(hashedPassword);
         return new ResponseEntity<>(auth(userDetailsJwtService.save(request)), HttpStatus.OK);
     }
 
