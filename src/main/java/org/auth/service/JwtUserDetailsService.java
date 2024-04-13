@@ -1,21 +1,39 @@
 package org.auth.service;
 
-import org.springframework.security.core.userdetails.User;
+import lombok.extern.slf4j.Slf4j;
+import org.auth.model.User;
+import org.auth.repository.UserDetailsJwtService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.Collections;
 
 @Service
+@Slf4j
 public class JwtUserDetailsService implements UserDetailsService {
+    private final UserDetailsJwtService userDetailsJwtService;
+    @Autowired
+    public JwtUserDetailsService(UserDetailsJwtService userDetailsJwtService) {
+        this.userDetailsJwtService = userDetailsJwtService;
+    }
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        if ("lokesh".equals(username)) {
-            return new User(username, "lokesh", new ArrayList<>());
-        } else {
-            throw new UsernameNotFoundException("User not found with username : " + username);
-        }
+        User user = userDetailsJwtService.findUserByName(username).orElseThrow(() -> new UsernameNotFoundException("User Not found in db with name " + username));
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(user.getName())
+                .password(user.getPassword())
+                .roles(String.valueOf(user.getRoles()))
+                .disabled(false)
+                .accountExpired(false)
+                .accountLocked(false)
+                .authorities(Collections.emptyList())
+                .credentialsExpired(false)
+                .build();
     }
+
+
 }

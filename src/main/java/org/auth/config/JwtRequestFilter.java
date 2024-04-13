@@ -25,7 +25,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private final JwtUserDetailsService jwtUserDetailsService;
 
     @Autowired
-    JwtRequestFilter(JwtTokenUtil jwtTokenUtil, JwtUserDetailsService jwtUserDetailsService){
+    JwtRequestFilter(JwtTokenUtil jwtTokenUtil, JwtUserDetailsService jwtUserDetailsService) {
         this.jwtTokenUtil = jwtTokenUtil;
         this.jwtUserDetailsService = jwtUserDetailsService;
     }
@@ -45,20 +45,18 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 log.info("error :", e);
             } catch (ExpiredJwtException e) {
                 log.info("Token expired !! ", e);
-            } catch (Exception e) {
-                e.printStackTrace();
-                log.info("Error occurred !!", e);
+            } catch (Exception exception) {
+                log.info("Exception occurred !!");
             }
         } else {
             log.warn("Token does not begin with Bearer string!! ");
         }
-
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             log.info("Inside second If condition !! ");
             UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
             if (Boolean.TRUE.equals(jwtTokenUtil.validateToken(jwtToken, userDetails))) {
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
+                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
             }
