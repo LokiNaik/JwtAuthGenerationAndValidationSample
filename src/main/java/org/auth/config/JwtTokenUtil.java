@@ -5,7 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
-import net.bytebuddy.implementation.bind.annotation.IgnoreForBinding;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -19,9 +19,10 @@ import java.util.function.Function;
 @Slf4j
 public class JwtTokenUtil {
 
-    public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
+    public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 1000;
 
-    private final SecretKey secret = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    public static final SecretKey secret = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+
 
     public String getUsernameFromToken(String token) {
         log.info("inside getUsernameFromToken : {} ", getClaimsFromToken(token, Claims::getSubject));
@@ -51,6 +52,7 @@ public class JwtTokenUtil {
     }
 
     public String generateToken(UserDetails userDetails) {
+        System.out.println("key " + secret.toString());
         log.info(" Inside generateToken method () ");
         Map<String, Object> claims = new HashMap<>();
         return doGenerateToken(claims, userDetails.getUsername());
@@ -59,7 +61,7 @@ public class JwtTokenUtil {
     private String doGenerateToken(Map<String, Object> claims, String username) {
         log.info(" inside doGenerate () ");
         return Jwts.builder().setClaims(claims).setSubject(username).setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000)).signWith(secret, SignatureAlgorithm.HS256)
+                .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY)).signWith(secret, SignatureAlgorithm.HS256)
                 .compact();
     }
 

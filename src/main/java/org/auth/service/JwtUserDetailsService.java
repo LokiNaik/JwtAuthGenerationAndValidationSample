@@ -14,7 +14,9 @@ import java.util.Collections;
 @Service
 @Slf4j
 public class JwtUserDetailsService implements UserDetailsService {
-    private final UserDetailsJwtService userDetailsJwtService;
+    //    @Autowired
+    private UserDetailsJwtService userDetailsJwtService;
+
     @Autowired
     public JwtUserDetailsService(UserDetailsJwtService userDetailsJwtService) {
         this.userDetailsJwtService = userDetailsJwtService;
@@ -35,5 +37,11 @@ public class JwtUserDetailsService implements UserDetailsService {
                 .build();
     }
 
-
+//    public boolean isUserExist(String username) {
+//        return userDetailsJwtService.isUserExist(username);
+//    }
+//
+//    public boolean existByEmail(String email) {
+//        return userDetailsJwtService.existByEmail(email);
+//    }
 }

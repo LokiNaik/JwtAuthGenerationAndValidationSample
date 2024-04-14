@@ -10,6 +10,4 @@ import java.util.Optional;
 public interface UserDetailsJwtService extends MongoRepository<User, String> {
 
     Optional<User> findUserByName(String username);
-
-//    Boolean isUserExist(String username);
 }
