@@ -2,7 +2,7 @@ package org.auth.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.auth.model.User;
-import org.auth.repository.UserDetailsJwtService;
+import org.auth.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -10,15 +10,16 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.List;
 
 @Service
 @Slf4j
 public class JwtUserDetailsService implements UserDetailsService {
     //    @Autowired
-    private UserDetailsJwtService userDetailsJwtService;
+    private UserRepository userDetailsJwtService;
 
     @Autowired
-    public JwtUserDetailsService(UserDetailsJwtService userDetailsJwtService) {
+    public JwtUserDetailsService(UserRepository userDetailsJwtService) {
         this.userDetailsJwtService = userDetailsJwtService;
     }
 
@@ -37,11 +38,8 @@ public class JwtUserDetailsService implements UserDetailsService {
                 .build();
     }
 
-//    public boolean isUserExist(String username) {
-//        return userDetailsJwtService.isUserExist(username);
-//    }
-//
-//    public boolean existByEmail(String email) {
-//        return userDetailsJwtService.existByEmail(email);
-//    }
+
+    public List<User> fetchAllUsers() {
+       return userDetailsJwtService.findAll();
+    }
 }

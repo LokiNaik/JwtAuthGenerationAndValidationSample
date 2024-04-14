@@ -2,12 +2,10 @@ package org.auth.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.auth.config.JwtTokenUtil;
-import org.auth.config.WebSecurityConfig;
 import org.auth.model.JwtRequest;
 import org.auth.model.JwtResponse;
 import org.auth.model.MessageResponse;
 import org.auth.model.User;
-import org.auth.repository.UserDetailsJwtService;
 import org.auth.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,30 +23,27 @@ import java.util.Objects;
 @RestController
 @CrossOrigin
 @Slf4j
+@RequestMapping(value = "/auth")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtil jwtTokenUtil;
     private final UserDetailsService userDetailsService;
-    private final UserDetailsJwtService userDetailsJwtService;
     private final UserRepository userRepository;
-    @Autowired
-    WebSecurityConfig webSecurityConfig;
 
     /**
      * @param jwtTokenUtil          The JwtTokenUtil.
      * @param userDetailsService    The UserDetailsService interface.
-     * @param userDetailsJwtService The UserDetailsJwtService user.
+     * @param userRepository The UserDetailsJwtService user.
      */
     @Autowired
-    public AuthController(JwtTokenUtil jwtTokenUtil, UserRepository userRepository,
-                          UserDetailsService userDetailsService, UserDetailsJwtService userDetailsJwtService,
+    public AuthController(JwtTokenUtil jwtTokenUtil,
+                          UserDetailsService userDetailsService, UserRepository userRepository,
                           AuthenticationManager authenticationManager) {
         this.jwtTokenUtil = jwtTokenUtil;
         this.userDetailsService = userDetailsService;
-        this.userDetailsJwtService = userDetailsJwtService;
-        this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
+        this.authenticationManager = authenticationManager;
     }
 
     /**
@@ -56,7 +51,7 @@ public class AuthController {
      * @return The JwtToken.
      * @throws Exception The Exception.
      */
-    @PostMapping(value = "/auth")
+    @PostMapping(value = "/refresh")
     public ResponseEntity<JwtResponse> generateToken(@RequestBody JwtRequest request) throws Exception {
         authenticate(request.getUsername(), (request.getPassword()));
         final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
@@ -74,7 +69,7 @@ public class AuthController {
     @PostMapping(value = "/login")
     public ResponseEntity<?> login(@RequestBody JwtRequest request) {
         log.info("Inside login() ");
-        final User user = userDetailsJwtService.findUserByName(request.getUsername())
+        final User user = userRepository.findUserByName(request.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User Not found in db with name " + request.getUsername()));
 
         final UserDetails userDetails = userDetailsService.loadUserByUsername(user.getName());
@@ -114,7 +109,7 @@ public class AuthController {
         String hashedPassword = passwordEncoder().encode(request.getPassword());
         request.setPassword(hashedPassword);
         //Storing user to DB
-        User user = userDetailsJwtService.save(request);
+        User user = userRepository.save(request);
         // Loading userByUsername
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getName());
         // Generating Auth Token
